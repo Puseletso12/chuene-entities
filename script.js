@@ -138,3 +138,72 @@ console.log(
   "%cWebsite built with modern web technologies",
   "color: #6B7280; font-size: 14px;"
 );
+
+// Firebase (CDN / ES Modules)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAVtQ-qQlio_X80g6BI04Ruzxo3dXyQGi4",
+  authDomain: "chuene-entities.firebaseapp.com",
+  projectId: "chuene-entities",
+  storageBucket: "chuene-entities.firebasestorage.app",
+  messagingSenderId: "368768209278",
+  appId: "1:368768209278:web:3230159855a337ba21232f",
+  measurementId: "G-1D9Z81FCV4",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Your existing form
+const contactForm = document.getElementById("contactForm");
+
+contactForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Get form data (your existing IDs)
+  const formData = {
+    name: document.getElementById("name").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    message: document.getElementById("message").value.trim(),
+    createdAt: serverTimestamp(), // server-side timestamp :contentReference[oaicite:7]{index=7}
+  };
+
+  // Basic validation
+  if (
+    !formData.name ||
+    !formData.email ||
+    !formData.phone ||
+    !formData.message
+  ) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  // Prevent double submits
+  const btn = contactForm.querySelector('button[type="submit"]');
+  const prevText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Sending...";
+
+  try {
+    // Write to Firestore collection "contacts" :contentReference[oaicite:8]{index=8}
+    await addDoc(collection(db, "contacts"), formData);
+
+    alert("Thank you for your message! We will get back to you soon.");
+    contactForm.reset();
+  } catch (err) {
+    console.error("Firestore error:", err);
+    alert("Sorry — message failed to send. Please try again.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = prevText;
+  }
+});
